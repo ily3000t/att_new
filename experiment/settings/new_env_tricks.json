@@ -1,0 +1,61 @@
+{
+    "mappo": {
+        "entropy_coef": [0.0001, 0.001, 0.1],
+        "gamma": [0.90, 0.95],
+        "hidden_sizes": [[64, 64], [256, 256]],
+        "activation_func": ["leaky_relu", "selu", "sigmoid", "tanh"],
+        "initialization_method": ["xavier_uniform_"],
+        "use_recurrent_policy": [true],
+        "use_feature_normalization": [false],
+        "lr": [0.00005, 0.005],
+        "critic_lr": [0.00005, 0.005],
+        "use_gae": [false],
+        "use_popart": [false],
+        "share_param": [false]
+    },
+    "maddpg": {
+        "expl_noise": [0.001, 0.01, 0.5, 1.0],
+        "gamma": [0.90, 0.95],
+        "hidden_sizes": [[64, 64], [256, 256]],
+        "activation_func": ["leaky_relu", "selu", "sigmoid", "tanh"],
+        "initialization_method": ["xavier_uniform_"],
+        "use_feature_normalization": [false],
+        "lr": [0.00005, 0.005],
+        "critic_lr": [0.00005, 0.005],
+        "n_step": [5, 25],
+        "share_param": [false],
+        "fine": ["tune"]
+    },
+    "qmix": {
+        "epsilon_anneal_time": [50000, 200000],
+        "epsilon_finish": [0.01, 0.1],
+        "eps_delta_l": {"epsilon_anneal_time": 80000, "epsilon_finish": 0.24},
+        "eps_delta_r": {"epsilon_anneal_time": 104211, "epsilon_finish": 0.01},
+        "gamma": [0.90, 0.95],
+        "hidden_sizes": [[64, 64], [256, 256]],
+        "activation_func": ["leaky_relu", "selu", "sigmoid", "tanh"],
+        "initialization_method": ["xavier_uniform_"],
+        "use_recurrent_policy": [true],
+        "use_feature_normalization": [false],
+        "lr": [0.00005, 0.005],
+        "n_step": [5, 25],
+        "share_param": [false]
+    },
+    "happo": {
+        "entropy_coef": [0, 0.0001, 0.001, 0.1],
+        "lr": [0.00005, 0.005, 0.001],
+        "critic_lr": [0.00005, 0.005, 0.001],
+        "clip_param": [0.05, 0.2],
+        "hidden_sizes": [[256, 256, 256],[128, 128, 128]],
+        "gamma": [0.90, 0.95],
+        "gae_lambda":[0.97],
+        "activation_func": ["leaky_relu", "selu", "sigmoid", "tanh"],
+        "initialization_method": ["xavier_uniform_"],
+        "ppo_epoch": [10, 15],
+        "critic_epoch": [10, 15],
+        "share_param": [true],
+        "use_linear_lr_decay": [true],
+        "use_recurrent_policy": [true],
+        "use_feature_normalization": [false]
+    }
+}

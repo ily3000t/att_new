@@ -1,0 +1,35 @@
+{
+    "schemes": {
+        "A": "Exploration and Exploitation",
+        "B": "Network Architecture",
+        "C": "Optimizer",
+        "D": "Advantage Estimation",
+        "E": "Multi-Agent Feature"
+    },
+    "params": {
+        "default": "+",
+        "entropy_coef": "A1",
+        "expl_noise": "A2",
+        "epsilon_anneal_time": "A3",
+        "epsilon_finish": "A4",
+        "eps_delta_l": "A5",
+        "eps_delta_r": "A6",
+        "gamma": "A7",
+        "hidden_sizes": "B1",
+        "activation_func": "B2",
+        "initialization_method": "B3",
+        "use_recurrent_policy": "B4",
+        "use_feature_normalization": "B5",
+        "lr": "C1",
+        "critic_lr": "C2",
+        "ppo_epoch": "C3",
+        "critic_epoch": "C4",
+        "clip_param": "C5",
+        "use_gae": "D1",
+        "use_popart": "D2",
+        "gae_lambda": "D3",
+        "n_step": "D3",
+        "share_param": "E1",
+        "fine_tune": "Tune"
+    }
+}

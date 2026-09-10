@@ -1,0 +1,6 @@
+scenario: intersection
+conf:
+  num_agents: 10
+  crash_done: True
+  out_of_road_done: True
+  allow_respawn: False

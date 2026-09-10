@@ -1,0 +1,4 @@
+map_name: 3s_vs_4z
+state_type: FP # choose from FP (Feature Pruned) and EP (Environment Provided)
+replay_dir: ""
+replay_prefix: ""

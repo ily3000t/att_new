@@ -1,0 +1,14 @@
+scenario: net
+network_cfg: config_ma2c_nc_net.ini
+output_dir: results/network_data # from root of repo
+override_args: # default blank
+
+
+# large_grid
+# config_ma2c_nc_grid.ini
+# real_net
+# config_ma2c_nc_net.ini
+# catchup
+# config_ma2c_nc_catchup.ini
+# slowdown
+# config_ma2c_nc_slowdown.ini

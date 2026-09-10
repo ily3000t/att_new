@@ -1,0 +1,3 @@
+task: ShadowHandPushBlock
+hands_episode_length: 75 # please refer to "episodeLength" in corresponding yaml under the amb/envs/dexhands/DexterousHands/bidexhands/cfg
+override_args: # default blank
