@@ -1,3 +1,25 @@
+##### Research artifacts and local configuration #####
+# Keep source directories such as amb/models/ tracked.
+/artifacts/
+/models/
+/checkpoints/
+/runs/
+/logs/
+/out/
+/experiment/out/
+wandb/
+mlruns/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.safetensors
+events.out.tfevents.*
+.env.*
+!.env.example
+# Legacy machine-specific upload helper; contains credential-like text.
+/upload.sh
+
 ##### Project Specification #####
 **/results/**
 results/
