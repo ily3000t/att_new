@@ -33,4 +33,4 @@
 - 新攻击先明确威胁模型和可访问的信息，再比较同预算 baseline；不能以额外权限或更大预算冒充算法改进。
 - 跨环境重新训练攻击器只能称为方法迁移；未经验证不能称为攻击权重零样本迁移。
 
-详细工作方式见 [DEVELOPMENT.md](DEVELOPMENT.md)。
+详细工作方式见 [DEVELOPMENT.md](DEVELOPMENT.md)，当前代码分析与路线见 [docs/research_assessment.md](docs/research_assessment.md)。
