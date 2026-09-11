@@ -1,5 +1,6 @@
 """Tools for loading and updating configs.""" ""
 import time
+from datetime import datetime
 import os
 import json
 import yaml
@@ -112,7 +113,7 @@ def init_dir(env, env_args, algo, exp_name, run_name, seed, logger_path):
         results_path = logger_path
     else:
         task = get_task_name(env, env_args)
-        hms_time = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+        hms_time = datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
         results_path = os.path.join(
             logger_path, env, task, run_name, algo, exp_name, "-".join(["seed-{:0>5}".format(seed), hms_time])
         )
@@ -176,6 +177,10 @@ def save_config(args, algo_args, env_args, run_dir):
     output = json.dumps(config_json, separators=(",", ":\t"), indent=4, sort_keys=True)
     with open(os.path.join(run_dir, "config.json"), "w", encoding="utf-8") as out:
         out.write(output)
+    if args["env"] == "network" and env_args["scenario"] in ("catchup", "slowdown"):
+        from amb.utils.run_manifest import write_run_manifest
+
+        write_run_manifest(config_json, run_dir)
 
 
 # 遍历nni_params，如果发现key是 xx.xx.xx 的形式，就把它转换成dict
