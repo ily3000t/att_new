@@ -1,6 +1,7 @@
 """Exercise the real PPO observation-attack runner over complete short episodes."""
 
 from copy import deepcopy
+import json
 from pathlib import Path
 
 import numpy as np
@@ -49,6 +50,10 @@ def test_discrete_attack_evaluation_and_zero_budget_replay(tmp_path, epsilon, it
         clean_returns = deepcopy(runner.logger.eval_episode_rewards)
         runner.eval_envs.envs[0].seed(500)
         runner.eval_adv()
+        records = [json.loads(line) for line in runner.logger.cacc_eval_path.read_text().splitlines()]
+        assert len(records) == 1
+        assert records[0]["episode_seed"] == 500
+        assert records[0]["team_return"] == pytest.approx(float(np.mean(runner.logger.eval_episode_rewards)))
         assert len(divergences) == 60
         for row in divergences:
             assert set(row) == {f"agent_{i}" for i in range(8)}

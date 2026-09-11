@@ -13,3 +13,11 @@
 ## 离散观测攻击评估
 
 `R_pi_values` 现在对离散和连续动作都记录分布差异，修复离散 CACC 的空列表索引错误。IGS 目标函数、幅度、作用对象和环境奖励未改变。回归测试执行真实 PPO runner 的完整短回合，检查零预算回报与配对 clean 相同，并检查单智能体攻击时其他智能体的分布未被修改。
+
+## 安全指标
+
+`NetworkEnv.step()` 在各 agent 的 `info['cacc']` 中透传原始间距、速度、前车速度、加速度、实际 episode seed 和碰撞状态。评估 logger 在每个完整 episode 结束时写入 `cacc_eval_XXXX.jsonl`，保存团队回报、最小间距、最小 TTC 代理、有效 TTC 样本数、低于阈值的比例和首次碰撞时间。
+
+TTC 代理仅在间距为正且后车更快时使用 `gap/closing_speed`，其余写为 JSON null；阈值默认 1 秒，可用 `env.ttc_threshold_s` 配置。暴露比例分母为有效 TTC 的 agent-step 数。碰撞后的冻结状态不增加安全样本，原始重复惩罚仍完整计入团队回报。团队回报取外层各 agent 重复奖励的均值，避免放大 8 倍。
+
+指标是只读附加信息。原始团队奖励尺度、600 步 horizon、碰撞后的 batch 边界终止行为均保留。当前碰撞仍是 OVM 的间距阈值事件。

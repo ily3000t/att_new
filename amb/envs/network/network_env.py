@@ -6,6 +6,7 @@ import configparser
 from gym.spaces import Discrete
 
 from amb.envs.network.envs.CACC import CACCWrapper
+from amb.envs.network.cacc_metrics import get_cacc_infos
 
 
 class NetworkEnv:
@@ -70,10 +71,12 @@ class NetworkEnv:
         infos: list of dict, e.g., [{}, {}]
         available_actions: 0-1 numpy.ndarray (num_agents, action_num) or None.
         """
+        is_cacc = self.scenario in ("catchup", "slowdown")
+        was_collided = self.env.env.collision if is_cacc else False
         obs, reward, done, global_reward = self.env.step(actions)
         rewards = np.array([global_reward] * self.n_agents)
         dones = np.array([done] * self.n_agents)
-        infos = [{}] * self.n_agents
+        infos = get_cacc_infos(self.env.env, was_collided) if is_cacc else [{} for _ in range(self.n_agents)]
 
         # 此处也需要对net的环境进行处理，将obs对齐到最大长度，后面补0，赋值给share_obs
         if self.scenario == "net":
