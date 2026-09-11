@@ -16,6 +16,7 @@ def make_cacc_runner(tmp_path):
         root = Path(__file__).resolve().parents[1]
         config = json.loads((root / "experiment/settings/network/catchup/mappo.json").read_text())
         train = config["algo_args"]["train"]
+        runner_cls = overrides.pop("runner_cls", OnPolicyRunner)
         train.update({
             "cuda": False, "torch_threads": 1, "hidden_sizes": [16, 16],
             "ppo_epoch": 1, "critic_epoch": 1, "n_rollout_threads": 1,
@@ -25,7 +26,7 @@ def make_cacc_runner(tmp_path):
             **overrides,
         })
         config["main_args"]["exp_name"] = "test_training"
-        runner = OnPolicyRunner(config["main_args"], config["algo_args"], config["env_args"])
+        runner = runner_cls(config["main_args"], config["algo_args"], config["env_args"])
         runners.append(runner)
         return runner
 
