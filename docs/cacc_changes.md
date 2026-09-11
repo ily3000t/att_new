@@ -41,3 +41,9 @@ single OnPolicyRunner 在有训练更新且最后一批不落在周期保存点�
 ## Rollout 末尾价值估计
 
 single OnPolicyRunner 的 bootstrap 现在读取最后一次转移之后的观测、critic 隐状态和 mask。buffer 的这些字段使用 offset=1，上游使用循环末尾的 `step`，实际取了倒数第二个状态。三步数值案例中，正确的下一状态价值为 1133，上游代码得到 1122；修复后通过。此项会改变未终止采样片段的回报目标及后续训练结果，须使用新的训练提交，不能将阶段 0 权重标注为此修复版本训练所得。
+
+## 回报递推与终止口径
+
+EpisodeBuffer 在 `use_proper_time_limits=False` 时原先沿 worker 数而非时间长度递推；现改为时间维。非 GAE 分支使用价值归一化时，末尾 bootstrap 先还原到奖励单位再递推。两个 worker、三个时间步的 24 组数值案例覆盖 GAE/非 GAE、归一化开关、连续片段/中途终止/末尾终止；修复前 14 组失败，修复后通过。默认 CACC 的 GAE + proper-time-limits 路径不受这两项 buffer 修复影响。
+
+当前协议将原生 CACC 的固定 60 秒场景结束视为有限回合终点，mask=0，不增加 `bad_transition`；碰撞仍按原有 batch 边界结束。若未来改为持续任务的时间截断，需要显式保存终止观测并重新制定 bootstrap 规则，不能仅切换一个 mask。此次保留有限回合目标，测试确认最后一步奖励不会因截断标志而丢失。
