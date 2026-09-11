@@ -2,11 +2,9 @@
 import os
 
 import numpy as np
-from amb.envs.network.envs.large_grid_env import LargeGridEnv
 import configparser
 from gym.spaces import Discrete
 
-from amb.envs.network.envs.real_net_env import RealNetEnv
 from amb.envs.network.envs.CACC import CACCWrapper
 
 
@@ -26,8 +24,12 @@ class NetworkEnv:
                     config["ENV_CONFIG"][k] = str(v)
 
         if scenario == "grid":
+            from amb.envs.network.envs.large_grid_env import LargeGridEnv
+
             self.env = LargeGridEnv(config["ENV_CONFIG"], port=port, output_path=env_args["output_dir"], is_record=True, record_stat=True)
         elif scenario == "net":
+            from amb.envs.network.envs.real_net_env import RealNetEnv
+
             self.env = RealNetEnv(config["ENV_CONFIG"], port=port, output_path=env_args["output_dir"], is_record=True, record_stat=True)
         elif scenario == "catchup":
             self.env = CACCWrapper(config["ENV_CONFIG"], bias=0, std=100)
