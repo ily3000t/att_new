@@ -41,6 +41,8 @@ Slow-down 使用 `experiment/settings/network/slowdown/mappo.json`，其他流�
 
 输出 `summary.json`、各条件的 manifest 和逐回合安全指标，并验证零预算与 clean 完全一致、扰动幅度不超出 epsilon。`applied_agent_steps` 是获得攻击机会的选中 agent-step 数（零预算时也可大于零），`candidate_calls` 包括 runner 为未选中 agent 计算但不施加的候选扰动；不将候选计算次数冒充实际修改次数。epsilon 的单位为归一化观测 L-infinity。
 
+较长训练、固定验证初态和模型选择见 [clean pilot 协议](cacc_clean_pilot.md)；已经执行的阶段进展与产物索引见 [阶段 1 记录](stage1_status.md)。
+
 ## 已有 SUMO 安装
 
 2026-09-11 已确认本机 `sumo --version` 为 **1.22.0**；所复用 Python 环境的 TraCI、sumolib 均为 **1.25.0**。本轮原生 CACC 不启动 SUMO，未修改该安装。后续 SUMO 驾驶阶段先验证这组客户端/服务端组合，必要时在单独环境匹配版本。

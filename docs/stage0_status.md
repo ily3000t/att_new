@@ -2,6 +2,8 @@
 
 更新日期：2026-09-11。阶段 0 的 CACC 工程修复和最小训练/攻击评估流程已完成；阶段 1 的正式 baseline 尚未完成。当前结果属于 **smoke**，不发布实验 tag。
 
+后续已执行的 100,000 步 clean pilot 与独立 checkout 重放见 [阶段 1 记录](stage1_status.md)，其结果与本页 smoke 批次分开保存。
+
 ## 本轮实现
 
 从 `main` 的 `8ddceaa` 创建 `fix/cacc-reproducibility`，按以下原子提交开发。修复后的学习结果与导入版本分开标识，具体语义差异见 [cacc_changes.md](cacc_changes.md)。
