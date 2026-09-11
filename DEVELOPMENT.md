@@ -30,7 +30,7 @@ git merge --no-ff feat/risk-aware-attack
 
 ## 一个实验，一份可追溯记录
 
-每个 run 至少保存以下信息；它们应由后续实验启动器自动采集。目前上游 `save_config()` 只保存参数 JSON，尚未实现完整的来源记录。
+每个 run 至少保存以下信息。当前原生 CACC 的 `save_config()` 已自动保存 `manifest.json`、最终配置和展开后的环境 INI；`single_train.py` 结束时补充状态及输出 checkpoint 校验和。其他环境尚未接入该 manifest。
 
 | 内容 | 必需字段 |
 | --- | --- |
@@ -44,7 +44,7 @@ git merge --no-ff feat/risk-aware-attack
 | 攻击 | 通道、受攻击对象、预算、时机、特征掩码、信息权限、实际修改量、查询/梯度次数 |
 | 指标 | 指标定义与单位、聚合口径、原始轨迹或数据文件位置、产物校验和 |
 
-仅记录 `seed=1` 或目录名不足以复现。对于 CACC，当前外层 seed 未传递到内核的问题也必须先修复和验证。
+仅记录 `seed=1` 或目录名不足以复现。CACC 外层 seed 传递及环境 RNG 隔离已修复；实际 episode seed 同时写入安全指标。详见 [CACC 变更记录](docs/cacc_changes.md)。
 
 建议输出结构（仓库外目录或已被 Git 忽略的 `artifacts/`）：
 
@@ -69,7 +69,7 @@ artifacts/<run_id>/
 - `origin`: `https://github.com/ily3000t/att_new.git`
 - `upstream`: `https://github.com/BUAA-TrustworthyMARL/adv_marl_benchmark.git`
 
-2026-09-10 当前主机到 GitHub 的 Git HTTPS 连接失败。完成本地分支合并后，可在 PowerShell 中重试：
+仓库所有者已告知手动上传完成。2026-09-11 本机重试 Git HTTPS 仍无法连接 GitHub 443，未能核对最新远端状态。完成本地分支合并后，可在 PowerShell 中重试：
 
 ```powershell
 Set-Location 'E:\adv_marl_benchmark-main'

@@ -280,13 +280,28 @@ def main():
     # start training
     from amb.runners import get_single_runner
     runner = get_single_runner(args["run"], args["algo"])(args, algo_args, env_args)
-    if algo_args["train"]['use_render']:  # render, not train
-        runner.render()
-    else:
-        runner.run()
-    
+    run_error = None
+    try:
+        if algo_args["train"]['use_render']:
+            runner.render()
+        else:
+            runner.run()
+    except BaseException as exc:
+        run_error = {"type": type(exc).__name__, "message": str(exc)}
+        raise
+    finally:
+        try:
+            runner.close()
+        except BaseException as exc:
+            run_error = run_error or {"type": type(exc).__name__, "message": str(exc)}
+            raise
+        finally:
+            if hasattr(runner, "run_dir"):
+                from amb.utils.run_manifest import finish_run_manifest
+
+                finish_run_manifest(runner.run_dir, run_error)
+
     print(">>>END Experiment finished successfully. END<<<")
-    runner.close()
 
 
 if __name__ == "__main__":

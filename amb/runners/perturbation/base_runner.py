@@ -369,7 +369,7 @@ class BaseRunner:
                                 action_dist_perturbed.mean - action_dist_original.mean, p=2
                                 ).mean().item()
 
-                            R_pi_values.append(divergence)
+                        R_pi_values.append(divergence)
 
                     # 记录到 Logger（按线程平均）
                     R_pi_dict = {f"agent_{agent_id}": R_pi_values[agent_id] for agent_id in range(self.num_agents)}
