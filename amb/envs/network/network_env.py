@@ -33,9 +33,11 @@ class NetworkEnv:
 
             self.env = RealNetEnv(config["ENV_CONFIG"], port=port, output_path=env_args["output_dir"], is_record=True, record_stat=True)
         elif scenario == "catchup":
-            self.env = CACCWrapper(config["ENV_CONFIG"], bias=0, std=100)
+            self.env = CACCWrapper(config["ENV_CONFIG"], bias=0, std=100,
+                                   record=env_args.get("record_legacy", False))
         elif scenario == "slowdown":
-            self.env = CACCWrapper(config["ENV_CONFIG"], bias=0, std=100)
+            self.env = CACCWrapper(config["ENV_CONFIG"], bias=0, std=100,
+                                   record=env_args.get("record_legacy", False))
         else:
             raise NotImplementedError(f"Scenario {scenario} not implemented.")
     

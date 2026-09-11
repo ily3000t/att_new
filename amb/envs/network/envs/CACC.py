@@ -8,10 +8,10 @@ COLLISION_WT = 5
 COLLISION_HEADWAY = 10
 VDIFF = 5
 class CACCWrapper(gym.Wrapper):
-    def __init__(self, config, bias=0, std=1, test=False):
+    def __init__(self, config, bias=0, std=1, test=False, record=True):
         # k-hop
         env = CACCEnv(config)
-        env.init_data(True, False, "/tmp")
+        env.init_data(record, False, "/tmp")
         super().__init__(env)
         self.observation_space = Box(-1e6, 1e6, [5])
         self.action_space = Discrete(4)

@@ -29,3 +29,7 @@ CACC run 现在自动记录完整 Git SHA、dirty 状态、最终配置和展开
 探索运行保存 tracked 差异与 untracked 文件快照。正式启动脚本应调用 `require_clean_source()`；仅存在 manifest 不自动代表正式实验或论文复现。run 输出目录时间戳增加微秒，避免相同 seed 在同一秒启动时覆盖。
 
 若进程被强制终止，或 runner 构造期间报错，manifest 可能保留 `running`；这表示没有完成记录，不能当作成功。metadata 不保存 RNG 中间状态，当前 checkpoint 用于评估，不是可无损续训的训练状态快照。
+
+## 长训练的内存日志
+
+通过 `NetworkEnv` 使用 CACC 时，默认关闭原始 wrapper 的跨回合内存记录器，避免 `control_data` 和 `traffic_data` 随训练步数持续增长。当前回合动力学历史和逐回合安全指标继续保留；需要原始调试记录时可显式设置 `env.record_legacy=True`。直接构造 CACCWrapper 仍保留原来的默认行为。两个场景各比较三个完整回合，开关前后的观测、奖励、终止和安全信息完全一致。
