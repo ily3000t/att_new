@@ -18,8 +18,15 @@ class CACCEnv:
         self.cur_episode = 0
         self.is_record = False
         self._init_space()
-        # required to achieve the same model initialization!
-        np.random.seed(self.seed)
+        # Environment resets must not reseed the policy/attack process RNG.
+        self.np_random = np.random.RandomState(self.seed)
+        self.episode_seed = None
+
+    def reseed(self, seed):
+        """Set the next episode seed without resetting or consuming an episode."""
+        self.np_random = np.random.RandomState(seed)
+        self.seed = int(seed)
+        self.episode_seed = None
 
     def _constrain_speed(self, v, u):
         # apply constraints
@@ -165,14 +172,14 @@ class CACCEnv:
 
     def reset(self, gui=False, test_ind=-1):
         self.cur_episode += 1
-        # np.random.seed(self.seed)
         if (self.train_mode):
             seed = self.seed
         elif (test_ind < 0):
             seed = self.seed-1
         else:
             seed = self.test_seeds[test_ind]
-        np.random.seed(seed)
+        self.episode_seed = int(seed)
+        self.np_random.seed(seed)
         self.seed += 1
         self._init_common()
         if self.name.startswith('catchup'):
@@ -291,7 +298,7 @@ class CACCEnv:
             self.hs[0][0] = self.h_star*2
         else:
             # s = [0, -1, -0.5, 0.5, 1]
-            self.hs[0][0] = self.h_star*(1.5+np.random.rand())
+            self.hs[0][0] = self.h_star*(1.5+self.np_random.rand())
             # self.hs[0][0] = self.h_star*(4+s[self.seed])
         # all vehicles have v_star initially
         self.vs = [np.ones(self.n_agent) * self.v_star]
@@ -311,7 +318,7 @@ class CACCEnv:
         if not self.seed:
             self.vs = [np.ones(self.n_agent) * 2*self.v_star]
         else:
-            self.vs = [np.ones(self.n_agent) * self.v_star*(1.5+np.random.rand())]
+            self.vs = [np.ones(self.n_agent) * self.v_star*(1.5+self.np_random.rand())]
         # leading vehicle is decelerating from 2v_star to v_star with 0.02*u_min
         self.v0s = np.ones(self.T+1) * self.v_star
         v0s_decel = np.linspace(self.vs[0][0], self.v_star, 300)

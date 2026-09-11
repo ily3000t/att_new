@@ -102,6 +102,11 @@ class NetworkEnv:
         return obs, share_obs, self.get_avail_actions()
 
     def seed(self, seed):
+        if self.scenario in ("catchup", "slowdown"):
+            self.env.env.reseed(seed)
+            for agent_id, space in enumerate(self.action_space):
+                space.seed(int(seed) + agent_id)
+            return
         self.env.seed = seed
         self.env.reset()
 
