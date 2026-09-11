@@ -140,6 +140,10 @@ class OnPolicyRunner(BaseRunner):
             for buffer in self.buffers:
                 buffer.after_update()
 
+        # The final update may fall between periodic checkpoint boundaries.
+        if episodes > 0 and episodes % self.algo_args['train']['eval_interval'] != 0:
+            self.save()
+
     @torch.no_grad()
     def collect(self, step):
         """Collect actions and values from actors and critics."""
