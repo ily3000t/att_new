@@ -203,7 +203,10 @@ class EpisodeBuffer:
                         gae = self.data["bad_masks"][:, step + 1] * gae
                         self.data["returns"][:, step] = gae + self.data["value_preds"][:, step]
             else:  # do not use GAE
-                self.data["returns"][:, -1] = next_values
+                self.data["returns"][:, -1] = (
+                    value_normalizer.denormalize(next_values)
+                    if value_normalizer is not None else next_values
+                )
                 for step in reversed(range(self.data["rewards"].shape[1])):
                     if value_normalizer is not None:  # use PopArt
                         self.data["returns"][:, step] = (
@@ -223,7 +226,7 @@ class EpisodeBuffer:
             if self.use_gae:  # use GAE
                 self.data["value_preds"][:, -1] = next_values
                 gae = 0
-                for step in reversed(range(self.data["rewards"].shape[0])):
+                for step in reversed(range(self.data["rewards"].shape[1])):
                     if value_normalizer is not None:  # use PopArt
                         delta = (
                             self.data["rewards"][:, step]
@@ -245,8 +248,11 @@ class EpisodeBuffer:
                         gae = delta + self.gamma * self.gae_lambda * self.data["masks"][:, step + 1] * gae
                         self.data["returns"][:, step] = gae + self.data["value_preds"][:, step]
             else:  # do not use GAE
-                self.data["returns"][:, -1] = next_values
-                for step in reversed(range(self.data["rewards"].shape[0])):
+                self.data["returns"][:, -1] = (
+                    value_normalizer.denormalize(next_values)
+                    if value_normalizer is not None else next_values
+                )
+                for step in reversed(range(self.data["rewards"].shape[1])):
                     self.data["returns"][:, step] = (
                         self.data["returns"][:, step + 1] * self.gamma * self.data["masks"][:, step + 1]
                         + self.data["rewards"][:, step]

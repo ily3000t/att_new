@@ -33,9 +33,11 @@ class NetworkEnv:
 
             self.env = RealNetEnv(config["ENV_CONFIG"], port=port, output_path=env_args["output_dir"], is_record=True, record_stat=True)
         elif scenario == "catchup":
-            self.env = CACCWrapper(config["ENV_CONFIG"], bias=0, std=100)
+            self.env = CACCWrapper(config["ENV_CONFIG"], bias=0, std=100,
+                                   record=env_args.get("record_legacy", False))
         elif scenario == "slowdown":
-            self.env = CACCWrapper(config["ENV_CONFIG"], bias=0, std=100)
+            self.env = CACCWrapper(config["ENV_CONFIG"], bias=0, std=100,
+                                   record=env_args.get("record_legacy", False))
         else:
             raise NotImplementedError(f"Scenario {scenario} not implemented.")
     
@@ -76,7 +78,7 @@ class NetworkEnv:
         obs, reward, done, global_reward = self.env.step(actions)
         rewards = np.array([global_reward] * self.n_agents)
         dones = np.array([done] * self.n_agents)
-        infos = get_cacc_infos(self.env.env, was_collided) if is_cacc else [{} for _ in range(self.n_agents)]
+        infos = get_cacc_infos(self.env.env, was_collided, actions) if is_cacc else [{} for _ in range(self.n_agents)]
 
         # 此处也需要对net的环境进行处理，将obs对齐到最大长度，后面补0，赋值给share_obs
         if self.scenario == "net":

@@ -109,13 +109,13 @@ class OnPolicyRunner(BaseRunner):
                 self.logger.per_step(data)  # logger callback at each step
                 self.insert(data, step)  # insert data into buffer
 
-            # compute return and update network
+            # Offset-1 fields contain the state AFTER the final transition at -1.
             value_collector = []
             for agent_id in range(self.num_agents):
                 value, _ = self.critic(
-                    self.buffers[agent_id].data["share_obs"][:, step],
-                    self.buffers[agent_id].data["rnn_states_critic"][:, step],
-                    self.buffers[agent_id].data["masks"][:, step],
+                    self.buffers[agent_id].data["share_obs"][:, -1],
+                    self.buffers[agent_id].data["rnn_states_critic"][:, -1],
+                    self.buffers[agent_id].data["masks"][:, -1],
                 )
                 value_collector.append(_t2n(value))
             next_values = np.stack(value_collector, axis=1)
@@ -139,6 +139,10 @@ class OnPolicyRunner(BaseRunner):
 
             for buffer in self.buffers:
                 buffer.after_update()
+
+        # The final update may fall between periodic checkpoint boundaries.
+        if episodes > 0 and episodes % self.algo_args['train']['eval_interval'] != 0:
+            self.save()
 
     @torch.no_grad()
     def collect(self, step):

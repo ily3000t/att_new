@@ -29,3 +29,25 @@ CACC run 现在自动记录完整 Git SHA、dirty 状态、最终配置和展开
 探索运行保存 tracked 差异与 untracked 文件快照。正式启动脚本应调用 `require_clean_source()`；仅存在 manifest 不自动代表正式实验或论文复现。run 输出目录时间戳增加微秒，避免相同 seed 在同一秒启动时覆盖。
 
 若进程被强制终止，或 runner 构造期间报错，manifest 可能保留 `running`；这表示没有完成记录，不能当作成功。metadata 不保存 RNG 中间状态，当前 checkpoint 用于评估，不是可无损续训的训练状态快照。
+
+## 长训练的内存日志
+
+通过 `NetworkEnv` 使用 CACC 时，默认关闭原始 wrapper 的跨回合内存记录器，避免 `control_data` 和 `traffic_data` 随训练步数持续增长。当前回合动力学历史和逐回合安全指标继续保留；需要原始调试记录时可显式设置 `env.record_legacy=True`。直接构造 CACCWrapper 仍保留原来的默认行为。两个场景各比较三个完整回合，开关前后的观测、奖励、终止和安全信息完全一致。
+
+## 最后一次更新的模型保存
+
+single OnPolicyRunner 在有训练更新且最后一批不落在周期保存点时，额外保存最终模型。避免短训练没有 checkpoint，或最终模型停留在较早批次；已有周期保存点不重复保存。三个真实 MAPPO 短训练案例验证保存时刻和模型张量。此修改不改变优化过程，也不将评估权重变成可无损续训的快照。
+
+## Rollout 末尾价值估计
+
+single OnPolicyRunner 的 bootstrap 现在读取最后一次转移之后的观测、critic 隐状态和 mask。buffer 的这些字段使用 offset=1，上游使用循环末尾的 `step`，实际取了倒数第二个状态。三步数值案例中，正确的下一状态价值为 1133，上游代码得到 1122；修复后通过。此项会改变未终止采样片段的回报目标及后续训练结果，须使用新的训练提交，不能将阶段 0 权重标注为此修复版本训练所得。
+
+## 回报递推与终止口径
+
+EpisodeBuffer 在 `use_proper_time_limits=False` 时原先沿 worker 数而非时间长度递推；现改为时间维。非 GAE 分支使用价值归一化时，末尾 bootstrap 先还原到奖励单位再递推。两个 worker、三个时间步的 24 组数值案例覆盖 GAE/非 GAE、归一化开关、连续片段/中途终止/末尾终止；修复前 14 组失败，修复后通过。默认 CACC 的 GAE + proper-time-limits 路径不受这两项 buffer 修复影响。
+
+当前协议将原生 CACC 的固定 60 秒场景结束视为有限回合终点，mask=0，不增加 `bad_transition`；碰撞仍按原有 batch 边界结束。若未来改为持续任务的时间截断，需要显式保存终止观测并重新制定 bootstrap 规则，不能仅切换一个 mask。此次保留有限回合目标，测试确认最后一步奖励不会因截断标志而丢失。
+
+## Clean 控制质量
+
+安全指标 schema v2 增加相对目标间距/速度的 RMSE 和每个 agent 的四类请求动作计数。分母为真实推进动力学的 agent-step 数，碰撞后的冻结段不重复计入；RMSE 是整个有效轨迹的控制误差，不是最后一步误差。用这些指标区分“没有碰撞但一直没有完成追赶”与有效控制，不改变环境奖励。

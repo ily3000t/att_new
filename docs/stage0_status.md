@@ -2,6 +2,8 @@
 
 更新日期：2026-09-11。阶段 0 的 CACC 工程修复和最小训练/攻击评估流程已完成；阶段 1 的正式 baseline 尚未完成。当前结果属于 **smoke**，不发布实验 tag。
 
+后续已执行的 100,000 步 clean pilot 与独立 checkout 重放见 [阶段 1 记录](stage1_status.md)，其结果与本页 smoke 批次分开保存。
+
 ## 本轮实现
 
 从 `main` 的 `8ddceaa` 创建 `fix/cacc-reproducibility`，按以下原子提交开发。修复后的学习结果与导入版本分开标识，具体语义差异见 [cacc_changes.md](cacc_changes.md)。
@@ -33,7 +35,7 @@
 
 这是同一台机器、同一依赖环境的重放验收，没有验证另一台机器或全新安装环境，也没有保存并逐项比较所有原始观测轨迹。32 个回合包括同 seed 重放，不能当作 32 个独立统计样本。
 
-当前短训练模型下，随机噪声和 IGS 的回报及所记录安全指标与 clean 相同。Slow-down 的 clean 回合本身已发生间距阈值事件；Catch-up 的 TTC 代理无有效闭合样本。因此本轮不能证明攻击有效、策略收敛或策略安全，下一步应先建立合格的 clean victim。
+当前短训练模型下，随机噪声和 IGS 的回报及所记录安全指标与 clean 相同。Slow-down 的 clean 回合本身已发生间距阈值事件；Catch-up 的 TTC 代理无有效闭合样本。因此本轮不能证明攻击有效、策略收敛或策略安全，下一步应通过较长训练曲线分析 clean victim 的收敛情况。Clean 的碰撞不构成淘汰条件。
 
 ## 本地产物索引
 
@@ -55,7 +57,7 @@
 1. 核对较长训练的内存和保存行为：原始 CACCWrapper 开启的内存日志会跨回合积累；原始 runner 在保存间隔写模型，短预算未到间隔可能没有 checkpoint。以独立修改处理，验证不改变转移或奖励。
 2. 单独审计 rollout 末尾 bootstrap、horizon 截断和 bad mask。当前仍保留上游逻辑；需要用明确数值案例决定是否修复，不能把本轮 smoke 当作训练算法正确性的完整证明。
 3. 从 Catch-up 的一个训练 seed 做较长 clean pilot，记录训练曲线、动作分布、间距/速度跟踪情况，并在独立验证 seeds 上选择 checkpoint。训练步数是预算，不能用达到某个步数代替收敛判断。
-4. clean victim 合格后，固定 checkpoint 运行同预算 Gaussian/IGS；记录动作改变率、攻击计算量和失败案例，再审计 targeted-observation、动作攻击与 MAD 路径。
+4. 记录 clean victim 的训练曲线和收敛证据，固定 checkpoint 运行同预算 Gaussian/IGS；允许 clean 存在碰撞，比较回报和碰撞率的变化，不使用零碰撞或固定回报提升百分比作为硬门槛。记录动作改变率、攻击计算量和失败案例，再审计 targeted-observation、动作攻击与 MAD 路径。
 5. 主结果采用至少 3 个独立训练 seed，预先固定独立的训练/验证/测试划分，先以每个 checkpoint 约 100 个配对测试回合估计方差，再调整数量。smoke 的 seeds 500/501 不作为未见测试集。
 6. 完成干净 checkout 的正式重跑、主要 baseline 与来源核对后，才创建 annotated 实验 tag，随后进入 Ours 的威胁模型、接口、风险目标和消融开发。
 
