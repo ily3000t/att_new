@@ -47,3 +47,7 @@ single OnPolicyRunner 的 bootstrap 现在读取最后一次转移之后的观�
 EpisodeBuffer 在 `use_proper_time_limits=False` 时原先沿 worker 数而非时间长度递推；现改为时间维。非 GAE 分支使用价值归一化时，末尾 bootstrap 先还原到奖励单位再递推。两个 worker、三个时间步的 24 组数值案例覆盖 GAE/非 GAE、归一化开关、连续片段/中途终止/末尾终止；修复前 14 组失败，修复后通过。默认 CACC 的 GAE + proper-time-limits 路径不受这两项 buffer 修复影响。
 
 当前协议将原生 CACC 的固定 60 秒场景结束视为有限回合终点，mask=0，不增加 `bad_transition`；碰撞仍按原有 batch 边界结束。若未来改为持续任务的时间截断，需要显式保存终止观测并重新制定 bootstrap 规则，不能仅切换一个 mask。此次保留有限回合目标，测试确认最后一步奖励不会因截断标志而丢失。
+
+## Clean 控制质量
+
+安全指标 schema v2 增加相对目标间距/速度的 RMSE 和每个 agent 的四类请求动作计数。分母为真实推进动力学的 agent-step 数，碰撞后的冻结段不重复计入；RMSE 是整个有效轨迹的控制误差，不是最后一步误差。用这些指标区分“没有碰撞但一直没有完成追赶”与有效控制，不改变环境奖励。
