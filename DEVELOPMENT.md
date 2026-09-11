@@ -69,7 +69,7 @@ artifacts/<run_id>/
 - `origin`: `https://github.com/ily3000t/att_new.git`
 - `upstream`: `https://github.com/BUAA-TrustworthyMARL/adv_marl_benchmark.git`
 
-2026-09-10 当前主机到 GitHub 的 Git HTTPS 连接失败。完成本地分支合并后，可在 PowerShell 中重试：
+仓库所有者已告知手动上传完成。2026-09-11 本机重试 Git HTTPS 仍无法连接 GitHub 443，未能核对最新远端状态。完成本地分支合并后，可在 PowerShell 中重试：
 
 ```powershell
 Set-Location 'E:\adv_marl_benchmark-main'
