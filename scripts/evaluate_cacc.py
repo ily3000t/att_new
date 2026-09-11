@@ -50,7 +50,7 @@ class BudgetAudit:
 
 def evaluate_condition(options, victim_config, output, condition):
     victim = deepcopy(victim_config["algo_args"]["train"])
-    victim["model_dir"] = str(options.victim_dir / "models")
+    victim["model_dir"] = str(options.checkpoint_dir)
     env_args = deepcopy(victim_config["env_args"])
     train = yaml.safe_load((ROOT / "amb/configs/algos_cfgs/mappo_traitor.yaml").read_text())
     epsilon = options.epsilon if condition in ("gaussian", "igs") else 0.0
@@ -125,6 +125,7 @@ def evaluate_condition(options, victim_config, output, condition):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--victim-dir", required=True, type=Path)
+    parser.add_argument("--checkpoint", default="models", help="Model subdirectory within victim-dir, e.g. slice/100000")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "artifacts/cacc_evaluation")
     parser.add_argument("--eval-seeds", nargs="+", type=int, default=[500, 501])
     parser.add_argument("--attack-seed", type=int, default=1)
@@ -151,8 +152,9 @@ def main():
     config = json.loads((options.victim_dir / "config.json").read_text(encoding="utf-8"))
     if config["main_args"]["env"] != "network" or config["main_args"]["algo"] != "mappo" or config["env_args"]["scenario"] not in ("catchup", "slowdown"):
         parser.error("this evaluator supports native CACC MAPPO victims")
-    if not (options.victim_dir / "models").is_dir():
-        parser.error("victim models directory does not exist")
+    options.checkpoint_dir = (options.victim_dir / options.checkpoint).resolve()
+    if not options.checkpoint_dir.is_relative_to(options.victim_dir) or not options.checkpoint_dir.is_dir():
+        parser.error("checkpoint must be an existing subdirectory of victim-dir")
     source = source_state() if options.allow_dirty else require_clean_source()
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
     output = options.output_dir.resolve() / f"{stamp}-{uuid.uuid4().hex[:8]}"
@@ -169,7 +171,8 @@ def main():
             raise RuntimeError("Zero-budget evaluation differs from paired clean evaluation")
     summary = {
         "source": source, "purpose": options.purpose, "scenario": config["env_args"]["scenario"],
-        "victim_dir": str(options.victim_dir), "zero_matches_clean": zero_equal, "conditions": results,
+        "victim_dir": str(options.victim_dir), "checkpoint_dir": str(options.checkpoint_dir),
+        "zero_matches_clean": zero_equal, "conditions": results,
     }
     path = output / "summary.json"
     path.write_text(json.dumps(summary, indent=2, allow_nan=False), encoding="utf-8")

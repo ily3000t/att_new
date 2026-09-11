@@ -35,6 +35,12 @@ def test_manifest_captures_resolved_ini_git_and_checkpoint_lineage(tmp_path, mon
     assert "speed_target = 14" in (directory / "environment.ini").read_text()
     checkpoint = data["input_checkpoints"]["victim"]
     assert checkpoint["training_run"]["commit"] == "b" * 40
+    snapshot = victim_run / "slice" / "20000"
+    snapshot.mkdir(parents=True)
+    (snapshot / "actor.pth").write_bytes(b"snapshot checkpoint")
+    lineage = run_manifest.checkpoint_inventory(snapshot)["training_run"]
+    assert lineage["commit"] == "b" * 40
+    assert lineage["checkpoint_subdirectory"] == "slice/20000"
     old_hash = checkpoint["files"][0]["sha256"]
     (model_dir / "actor.pth").write_bytes(b"different fixture")
     assert run_manifest.checkpoint_inventory(model_dir)["files"][0]["sha256"] != old_hash

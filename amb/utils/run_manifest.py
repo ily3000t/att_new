@@ -58,8 +58,10 @@ def checkpoint_inventory(model_dir, include_lineage=True):
     if directory.is_dir():
         for path in sorted(directory.rglob("*.pth")):
             result["files"].append({"path": path.relative_to(directory).as_posix(), "sha256": sha256_file(path)})
-    parent_manifest = directory.parent / "manifest.json"
-    if include_lineage and parent_manifest.is_file():
+    # Standard models/ and slice/<step>/ both belong to the same training run.
+    parent_manifest = next((parent / "manifest.json" for parent in (directory.parent, directory.parent.parent)
+                            if (parent / "manifest.json").is_file()), None)
+    if include_lineage and parent_manifest is not None:
         parent = json.loads(parent_manifest.read_text(encoding="utf-8"))
         result["training_run"] = {
             "manifest_sha256": sha256_file(parent_manifest),
@@ -67,6 +69,7 @@ def checkpoint_inventory(model_dir, include_lineage=True):
             "commit": parent.get("source", {}).get("commit"),
             "config_sha256": parent.get("config_sha256"),
             "seed": parent.get("seeds", {}).get("process_seed"),
+            "checkpoint_subdirectory": directory.relative_to(parent_manifest.parent).as_posix(),
         }
     return result
 

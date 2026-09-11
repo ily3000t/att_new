@@ -25,3 +25,11 @@
 - 训练只完成设定的预算，脚本不会承诺有限步数必然收敛。`convergence_status=requires_curve_review` 表示需要结合曲线分析，而不是实验失败。
 
 所有模型、逐回合结果和曲线数据保存在被忽略的 `artifacts/cacc_clean_pilot/`。每个 run 包含 `manifest.json`、`config.json`、`environment.ini`、`pilot_validation.jsonl`、`pilot_summary.json`、最终 `models/` 和各时刻的 `slice/<step>/`。summary 同时保存所选模型、最终模型和最高验证回报模型的哈希。当前 checkpoint 是评估权重，不包含可无损续训所需的全部优化器和 RNG 状态；增加预算时须明确新训练运行，不能伪装成连续续训。
+
+配对攻击评估支持 `--checkpoint slice/<step>`，默认仍加载 `models/`。两者均关联训练 run 的 manifest 和该组模型的 SHA-256。示例使用独立于模型选择的 pilot 评估初态：
+
+```powershell
+.\.venv\Scripts\python.exe scripts/evaluate_cacc.py --victim-dir '<training-run-directory>' --checkpoint slice/100000 --eval-seeds 1100000 1100001 1100002 1100003 --attacks clean zero gaussian igs --epsilon 0.05 --iterations 10 --purpose pilot
+```
+
+这些 pilot 初态属于方法开发数据，不能再称为未使用过的正式测试集。测试时固定 checkpoint 和 seed，允许 clean 已有碰撞；报告攻击前后碰撞率的百分点变化和 `J_clean - J_attack`，不预设攻击必须成功。
